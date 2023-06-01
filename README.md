@@ -1,4 +1,17 @@
-# endpoint
+## Setup
+
+### API Keys
+
+In this code, process.env.OPENAI_API_KEY and process.env.WIX_API_KEY are used to access the OpenAI API and Wix API respectively. You'll need to create a .env file in the root of your project and add your API keys there. The .env file should look like this:
+
+```
+OPENAI_API_KEY=your_openai_api_key
+WIX_API_KEY=your_wix_api_key
+```
+
+> Note: The .env file is included in the .gitignore file so that it is not committed to the repository. This is to prevent your API keys from being exposed to the public.
+
+## Try it out
 
 > Test and experiment with the endpoint directly through Postman.
 
