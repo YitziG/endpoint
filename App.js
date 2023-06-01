@@ -41,7 +41,7 @@ app.post('/chat-completions', async (req, res) => {
         const result = await chain.call({question: userText});
         console.log('APIChain call result: ', result);
 
-        res.send(result);
+        res.send(result.output);
         console.log('Response sent');
     } catch (error) {
         console.error('Error during request processing: ', error);
