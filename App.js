@@ -1,48 +1,50 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const { OpenAI } = require('langchain/llms/openai');
-const { APIChain } = require('langchain/chains');
-const { WIX_API_DOCS } = require('langchain/docs/wix');
-const { setTokensForUser } = require('./wix/token_management.mjs');
-const { wixClient } = require('./wix/wix_client.mjs');
+import express from "express";
+import bodyParser from "body-parser";
+import {OpenAI} from "langchain/llms/openai";
+
+import {APIChain} from "langchain/chains";
+
+import {WIX_API_DOCS} from "./langchain/docs/wix.mjs";
+
 
 // Load environment variables from .env file
-require('dotenv').config();
+import {config} from "dotenv";
+
+config();
 
 const app = express();
 
 app.use(bodyParser.json());
 
+app.use((req, res, next) => {
+    console.log(`Request received: ${req.method} ${req.originalUrl}`);
+    next();
+});
 app.post('/chat-completions', async (req, res) => {
+    console.log('Processing /chat-completions request...');
     const userText = req.body.text;
-    const userId = req.body.userId;
 
     try {
-        // Set the user's tokens in the Wix database
-        await setTokensForUser(userId);
+        console.log('Tokens for user set successfully');
         // Initialize the OpenAI model with your API key
-        const model = new OpenAI({ modelName: "gpt-4", apiKey: process.env.OPENAI_API_KEY });
-
+        const model = new OpenAI({modelName: "gpt-4", openAIApiKey: process.env.OPENAI_API_KEY});
+        console.log('OpenAI model initialized');
         // Initialize the APIChain with the OpenAI model and the Wix API documentation
-        const chain = APIChain.fromLLMAndAPIDocs(model, WIX_API_DOCS);
+        const chain = APIChain.fromLLMAndAPIDocs(model, WIX_API_DOCS, {
+            headers: {
+                Authorization: `Bearer ${process.env.WIX_API_KEY}`, 'wix-site-id': process.env.WIX_SITE_ID,
+            }
+        });
+        console.log('APIChain initialized');
 
         // Call the chain with the user's text
-        const result = await chain.call({ question: userText });
+        const result = await chain.call({question: userText});
+        console.log('APIChain call result: ', result);
 
-        console.log(result);
-
-        // TODO: Process the result and perform the appropriate actions on the Wix API
-
-        // // Execute tasks using the Wix Headless API
-        // const wixResponse = await axios.post('YOUR_WIX_API_ENDPOINT', {
-        //     action: langchainResponse.choices[0].text,
-        //     apiKey: 'YOUR_WIX_API_KEY',
-        // });
-
-        // temporarily return the premature result from the chain
-        res.send(result.data);
+        res.send(result);
+        console.log('Response sent');
     } catch (error) {
-        console.error(error);
+        console.error('Error during request processing: ', error);
         res.status(500).send('Something went wrong');
     }
 });
