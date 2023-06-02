@@ -2,7 +2,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import {OpenAI} from "langchain/llms/openai";
 import {APIChain} from "langchain/chains";
-import { StructuredOutputParser } from "langchain/output_parsers";
+
 import {WIX_API_DOCS} from "./langchain/docs/wix.mjs";
 
 
@@ -35,7 +35,7 @@ app.post('/everything', async (req, res) => {
             }
         });
         console.log('APIChain initialized');
-        console.log('request:', userText);
+
         // Call the chain with the user's text
         const result = await chain.call({question: userText});
         console.log('APIChain call result: ', result);
